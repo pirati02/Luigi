@@ -7,7 +7,7 @@ public class Session : IEquatable<Session>
         Id = id;
     }
 
-    public Guid Id { get; private set; }
+    public Guid Id { get; }
 
     public static Session From(Guid id)
     {
@@ -19,7 +19,7 @@ public class Session : IEquatable<Session>
         return other?.Id == Id;
     }
 
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
         return Equals(obj as Session);
     }

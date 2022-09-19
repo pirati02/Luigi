@@ -4,7 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using Reservation.Api.Feature.MakeDraftReservation.ReservationCreated;
 using Reservation.Api.Service;
 using Reservation.Domain.ValueObjects;
-using Reservation.Infrastructure;
+using Reservation.EventStore;
+using Reservation.Postgres;
 using Reservation.Settings.Infrastructure;
 using SharedKernel;
 

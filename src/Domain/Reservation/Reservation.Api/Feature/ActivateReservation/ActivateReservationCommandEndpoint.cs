@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Reservation.Api.Feature.ActivateReservation.ReservationActivated;
 using Reservation.Api.Service;
 using Reservation.Domain.Model;
-using Reservation.Infrastructure;
+using Reservation.EventStore;
 using SharedKernel;
 
 namespace Reservation.Api.Feature.ActivateReservation;

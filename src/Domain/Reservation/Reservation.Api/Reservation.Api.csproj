@@ -23,9 +23,16 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\Infrastructure\Reservation.ElasticSearch\Reservation.ElasticSearch.csproj" />
+        <ProjectReference Include="..\Infrastructure\Reservation.EventStore\Reservation.EventStore.csproj" />
+        <ProjectReference Include="..\Infrastructure\Reservation.Postgres\Reservation.Postgres.csproj" />
         <ProjectReference Include="..\Reservation.Domain\Reservation.Domain.csproj" />
         <ProjectReference Include="..\Reservation.Infrastructure\Reservation.Infrastructure.csproj" />
         <ProjectReference Include="..\Reservation.Settings.Infrastructure\Reservation.Settings.Infrastructure.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Infrastructure\ElasticSearch" />
     </ItemGroup>
 
 </Project>

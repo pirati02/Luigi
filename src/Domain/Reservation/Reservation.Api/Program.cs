@@ -4,13 +4,13 @@ using Marten.Events;
 using Marten.Events.Projections;
 using Microsoft.EntityFrameworkCore;
 using Nest;
-using Reservation.Api.Infrastructure;
-using Reservation.Api.Infrastructure.ElasticSearch;
 using Reservation.Api.Logging;
 using Reservation.Api.Service;
-using Reservation.Infrastructure;
-using Reservation.Infrastructure.Projection;
-using Reservation.Settings.Infrastructure;
+using Reservation.ElasticSearch;
+using Reservation.ElasticSearch.Configure;
+using Reservation.EventStore;
+using Reservation.EventStore.Projection;
+using Reservation.Postgres;
 using Serilog;
 using Weasel.Core;
 

@@ -1,10 +1,11 @@
-using Elasticsearch.Net;
 using FastEndpoints;
 using Nest;
-using Reservation.Api.Infrastructure.ElasticSearch;
 using Reservation.Api.Service;
 using Reservation.Domain.Model;
 using Reservation.Domain.ValueObjects;
+using Reservation.ElasticSearch;
+using Reservation.ElasticSearch.Configure;
+using Reservation.ElasticSearch.Document;
 using SharedKernel;
 
 namespace Reservation.Api.Feature.ActivateReservation.ReservationActivated;
