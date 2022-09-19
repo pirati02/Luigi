@@ -1,0 +1,6 @@
+{
+  "ConnectionStrings": {
+    "ReservationDb": "Server=localhost;Port=5434;Database=Reservation;Username=admin;Password=adminpass",
+    "ReservationEventDb": "Host=localhost;Port=5434;Database=ReservationEvents;Username=admin;Password=adminpass"
+  }
+}
