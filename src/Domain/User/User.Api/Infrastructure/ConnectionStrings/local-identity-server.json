@@ -1,0 +1,6 @@
+{
+    "Jwt": {
+        "Key": "secret-key-local",
+        "Issuer": "local-issuer.com"
+    }
+}

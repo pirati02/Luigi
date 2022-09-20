@@ -9,14 +9,14 @@
 
     <ItemGroup>
       <PackageReference Include="FastEndpoints" Version="5.1.0" />
-      <PackageReference Include="NEST" Version="7.17.4" />
+        <PackageReference Include="FastEndpoints.Swagger" Version="5.1.0" />
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.9" />
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\..\..\Framework\SharedKernel\SharedKernel.csproj" />
-      <ProjectReference Include="..\Infrastructure\User.Infrastructure\User.Infrastructure.csproj" />
+      <ProjectReference Include="..\Infrastructure\User.Neo4j\User.Neo4j.csproj" />
       <ProjectReference Include="..\User.Domain\User.Domain.csproj" />
-      <ProjectReference Include="..\User.Infrastructure\User.Infrastructure.csproj" />
     </ItemGroup>
 
 </Project>

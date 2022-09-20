@@ -1,36 +1,39 @@
 using FastEndpoints;
+using Microsoft.AspNetCore.Authorization;
 using SharedKernel;
 using User.Api.Service;
-using User.Domain;
 
-namespace User.Api.Feature;
+namespace User.Api.Feature.Register;
 
+[HttpPost("users")]
+[AllowAnonymous]
 public class RegisterUserCommandEndpoint : Endpoint<RegisterUserCommand>
 {
     private readonly IUserService _userService;
 
     public RegisterUserCommandEndpoint(IUserService userService)
     {
+        Validator<RegisterUserCommandValidator>();
         _userService = userService;
     }
 
     public override async Task HandleAsync(RegisterUserCommand req, CancellationToken ct)
     {
-        var registeredUser = await _userService.FindBy(new Email(req.Email), ct);
-        if (registeredUser.Source is not null)
+        var registeredUser = await _userService.FindByAsync(req.Email, ct);
+        if (registeredUser is not null)
         {
             throw new DomainException("user already exists");
         }
 
-        var id = await _userService.RegisterAsync(
+        await _userService.RegisterAsync(
             req.FirstName,
             req.LastName,
-            req.Mobile,
             req.Email,
-            req.CountryCode,
-            ct
+            req.Password,
+            req.Mobile,
+            req.CountryCode
         );
         
-        await SendOkAsync(id, ct);
+        await SendOkAsync(ct);
     }
 }

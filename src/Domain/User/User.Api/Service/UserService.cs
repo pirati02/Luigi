@@ -1,74 +1,70 @@
-using Nest;
-using User.Domain;
-using User.Infrastructure;
-using User.Infrastructure.Document;
+using Neo4jClient;
 
 namespace User.Api.Service;
 
 public interface IUserService
 {
-    Task<IHit<UserDocument>> FindBy(Email email, CancellationToken ct);
+    Task<Neo4j.User?> FindByAsync(string email, CancellationToken ct);
+    Task<Neo4j.User> LoginAsync(string email, string password, CancellationToken ct);
 
-    Task<string> RegisterAsync(
+    Task RegisterAsync(
         string firstName,
         string lastName,
-        string mobile,
         string email,
-        int? countryCode,
-        CancellationToken ct
+        string password,
+        string mobile,
+        int? countryCode
     );
 }
 
 public class UserService : IUserService
 {
-    private readonly IElasticClient _elasticClient;
+    private readonly IGraphClient _graphClient;
+    private readonly IPasswordGenerator _passwordGenerator;
 
-    public UserService(IElasticClient elasticClient)
+    public UserService(IGraphClient graphClient, IPasswordGenerator passwordGenerator)
     {
-        _elasticClient = elasticClient;
+        _graphClient = graphClient;
+        _passwordGenerator = passwordGenerator;
     }
 
-    public async Task<IHit<UserDocument>> FindBy(Email email, CancellationToken ct)
+    public async Task<Neo4j.User?> FindByAsync(string email, CancellationToken ct)
     {
-        var document = await _elasticClient.SearchAsync<UserDocument>(s => s
-                .Index(ElasticConfiguration.IndexConfig.UsersIndex)
-                .From(0)
-                .Size(1)
-                .Query(q => q
-                    .Bool(b => b
-                        .Must(
-                            mu => mu
-                                .Term(t => t
-                                    .Field(f => f.Email)
-                                    .Value(email.Value))
-                        )
-                    )
-                )
-            , ct);
-
-        return document.Hits.FirstOrDefault()!;
+        var result = (
+            await _graphClient.Cypher.Match("(user:User)")
+                .Where((Neo4j.User user) => user.Email == email)
+                .Return(user => user.As<Neo4j.User>())
+                .ResultsAsync
+        ).ToList();
+        return result.Any() ? result[0] : null;
     }
 
-    public async Task<string> RegisterAsync(
+    public Task<Neo4j.User> LoginAsync(string email, string password, CancellationToken ct)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task RegisterAsync(
         string firstName,
         string lastName,
-        string mobile,
         string email,
-        int? countryCode,
-        CancellationToken ct)
+        string password,
+        string mobile,
+        int? countryCode
+    )
     {
-        var document = new UserDocument(
-            firstName,
-            lastName,
-            email,
-            mobile,
-            countryCode
-        );
-        var result = await _elasticClient.IndexAsync(
-            document,
-            a => a.Index(ElasticConfiguration.IndexConfig.UsersIndex),
-            ct
-        );
-        return result.Id;
+        var encrypted = _passwordGenerator.Generate(password);
+        await _graphClient.Cypher
+            .Create(
+                "(u:User {FirstName:$firstName, LastName:$lastName, Email:$email, Mobile:$mobile, CountryCode:$countryCode, Password:$password})")
+            .WithParams(new Dictionary<string, object>
+            {
+                { "firstName", firstName },
+                { "lastName", lastName },
+                { "email", email },
+                { "mobile", mobile },
+                { "countryCode", countryCode },
+                { "password", encrypted },
+            }).ExecuteWithoutResultsAsync();
     }
 }
