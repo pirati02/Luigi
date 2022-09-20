@@ -4,9 +4,7 @@ namespace User.Api.Service;
 
 public interface IUserService
 {
-    Task<Neo4j.User?> FindByAsync(string email, CancellationToken ct);
-    Task<Neo4j.User> LoginAsync(string email, string password, CancellationToken ct);
-
+    Task<Neo4j.User?> FindByAsync(string email);
     Task RegisterAsync(
         string firstName,
         string lastName,
@@ -28,7 +26,7 @@ public class UserService : IUserService
         _passwordGenerator = passwordGenerator;
     }
 
-    public async Task<Neo4j.User?> FindByAsync(string email, CancellationToken ct)
+    public async Task<Neo4j.User?> FindByAsync(string email)
     {
         var result = (
             await _graphClient.Cypher.Match("(user:User)")
@@ -37,11 +35,6 @@ public class UserService : IUserService
                 .ResultsAsync
         ).ToList();
         return result.Any() ? result[0] : null;
-    }
-
-    public Task<Neo4j.User> LoginAsync(string email, string password, CancellationToken ct)
-    {
-        throw new NotImplementedException();
     }
 
     public async Task RegisterAsync(

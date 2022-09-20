@@ -47,7 +47,7 @@ public class PhoneNumberValidator<T> : PropertyValidator<T, string>
             value = value.Replace(" ", "");
         }
 
-        var match = Regex.Match(value, @"^(\+[0-9])$");
+        var match = Regex.Match(value, @"^[0-9]");
         if (!match.Success)
         {
             context.AddFailure("invalid phone number");

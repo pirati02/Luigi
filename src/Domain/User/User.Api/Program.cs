@@ -1,8 +1,6 @@
-using System.Text;
 using FastEndpoints;
 using FastEndpoints.Swagger;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Neo4jClient;
 using User.Api.Service;
 using User.Neo4j;
@@ -16,6 +14,7 @@ builder.WebHost.ConfigureAppConfiguration(cfg =>
 
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddSingleton<IPasswordGenerator, PasswordGenerator>();
+builder.Services.AddScoped<IIdentityService, IdentityService>();
 builder.Services.AddSingleton<IGraphClient>(Neo4jConnector.Connect(builder.Configuration));
 builder.Services.AddFastEndpoints();
 builder.Services.AddSwaggerDoc(c =>
@@ -23,25 +22,19 @@ builder.Services.AddSwaggerDoc(c =>
     c.Title = "totle";
     c.Version = 1.ToString();
 });
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
     {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            ValidIssuer = builder.Configuration["Jwt:Issuer"],
-            ValidAudience = builder.Configuration["Jwt:Issuer"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
-        };
+        options.ExpireTimeSpan = TimeSpan.FromMinutes(20);
+        options.SlidingExpiration = true;
     });
+builder.Services.AddAuthorization();
 
 var app = builder.Build();
-app.UseFastEndpoints();
 app.UseAuthentication();
+app.UseRouting();
 app.UseAuthorization();
+app.UseFastEndpoints();
 app.UseApimundo();
 app.UseSwaggerUi3();
 app.Run();

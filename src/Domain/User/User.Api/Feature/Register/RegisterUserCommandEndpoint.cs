@@ -13,13 +13,12 @@ public class RegisterUserCommandEndpoint : Endpoint<RegisterUserCommand>
 
     public RegisterUserCommandEndpoint(IUserService userService)
     {
-        Validator<RegisterUserCommandValidator>();
         _userService = userService;
     }
 
     public override async Task HandleAsync(RegisterUserCommand req, CancellationToken ct)
     {
-        var registeredUser = await _userService.FindByAsync(req.Email, ct);
+        var registeredUser = await _userService.FindByAsync(req.Email);
         if (registeredUser is not null)
         {
             throw new DomainException("user already exists");

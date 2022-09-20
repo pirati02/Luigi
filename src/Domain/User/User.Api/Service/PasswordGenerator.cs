@@ -1,4 +1,5 @@
 using System.Security.Cryptography;
+using System.Text;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 
 namespace User.Api.Service;
@@ -12,7 +13,7 @@ public class PasswordGenerator : IPasswordGenerator
 {
     public string Generate(string password)
     {
-        byte[] salt = RandomNumberGenerator.GetBytes(128 / 8);
+        var salt = Encoding.UTF8.GetBytes("test_sult");
 
         string hashed = Convert.ToBase64String(KeyDerivation.Pbkdf2(
             password: password!,
