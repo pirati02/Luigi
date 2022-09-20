@@ -8,14 +8,15 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="FastEndpoints" Version="5.1.0" />
-        <PackageReference Include="FastEndpoints.Swagger" Version="5.1.0" />
+        <PackageReference Include="FastEndpoints" Version="5.1.0"/>
+        <PackageReference Include="FastEndpoints.Swagger" Version="5.1.0"/>
+        <PackageReference Include="RabbitMQ.Client.Core.DependencyInjection" Version="5.0.0"/>
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\..\Framework\SharedKernel\SharedKernel.csproj" />
-      <ProjectReference Include="..\Infrastructure\User.Neo4j\User.Neo4j.csproj" />
-      <ProjectReference Include="..\User.Domain\User.Domain.csproj" />
+        <ProjectReference Include="..\..\..\Framework\SharedKernel\SharedKernel.csproj"/>
+        <ProjectReference Include="..\Infrastructure\User.Neo4j\User.Neo4j.csproj"/>
+        <ProjectReference Include="..\User.Domain\User.Domain.csproj"/>
     </ItemGroup>
 
 </Project>

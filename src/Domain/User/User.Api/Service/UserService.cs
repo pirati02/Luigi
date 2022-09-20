@@ -5,6 +5,7 @@ namespace User.Api.Service;
 public interface IUserService
 {
     Task<Neo4j.User?> FindByAsync(string email);
+
     Task RegisterAsync(
         string firstName,
         string lastName,
@@ -46,10 +47,14 @@ public class UserService : IUserService
         int? countryCode
     )
     {
-        var encrypted = _passwordGenerator.Generate(password);
+        var encrypted = string.IsNullOrWhiteSpace(password)
+            ? string.Empty
+            : _passwordGenerator.Generate(password);
+        var notActive = string.IsNullOrWhiteSpace(password);
+
         await _graphClient.Cypher
             .Create(
-                "(u:User {FirstName:$firstName, LastName:$lastName, Email:$email, Mobile:$mobile, CountryCode:$countryCode, Password:$password})")
+                "(u:User {FirstName:$firstName, LastName:$lastName, Email:$email, Mobile:$mobile, CountryCode:$countryCode, Password:$password, NotActive:$notActive})")
             .WithParams(new Dictionary<string, object>
             {
                 { "firstName", firstName },
@@ -58,6 +63,7 @@ public class UserService : IUserService
                 { "mobile", mobile },
                 { "countryCode", countryCode },
                 { "password", encrypted },
+                { "notActive", notActive }
             }).ExecuteWithoutResultsAsync();
     }
 }

@@ -15,11 +15,13 @@
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="NEST" Version="7.17.4" /> 
+        <PackageReference Include="NEST" Version="7.17.4" />
+        <PackageReference Include="RabbitMQ.Client" Version="6.4.0" /> 
         <PackageReference Include="Serilog.AspNetCore" Version="6.0.1" />
         <PackageReference Include="Serilog.Enrichers.Environment" Version="2.2.0" />
         <PackageReference Include="Serilog.Sinks.Debug" Version="2.0.0" />
         <PackageReference Include="Serilog.Sinks.Elasticsearch" Version="8.4.1" />
+        <PackageReference Include="RabbitMQ.Client.Core.DependencyInjection" Version="5.0.0" />
     </ItemGroup>
 
     <ItemGroup>
@@ -29,10 +31,6 @@
         <ProjectReference Include="..\Reservation.Domain\Reservation.Domain.csproj" />
         <ProjectReference Include="..\Reservation.Infrastructure\Reservation.Infrastructure.csproj" />
         <ProjectReference Include="..\Reservation.Settings.Infrastructure\Reservation.Settings.Infrastructure.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Infrastructure\ElasticSearch" />
     </ItemGroup>
 
 </Project>

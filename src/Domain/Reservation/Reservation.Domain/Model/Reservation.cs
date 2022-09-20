@@ -1,5 +1,6 @@
 using Reservation.Domain.Events;
 using Reservation.Domain.ValueObjects;
+using Reservation.Model.ValueObjects;
 using SharedKernel;
 
 namespace Reservation.Domain.Model;
@@ -16,7 +17,6 @@ public class Reservation : DomainEntity, IAggregateRoot
 
     public Reservation()
     {
-        
     }
 
     public ReservationStatus ReservationStatus { get; private set; }
@@ -46,7 +46,17 @@ public class Reservation : DomainEntity, IAggregateRoot
     public static Reservation CreateDraft(InitiatorUser initiatorUser, ReservationTime time, Seat seat, Session session)
     {
         var reservation = new Reservation(initiatorUser, time, seat, session);
-        reservation.Apply(new CreateDraftReservationEvent(initiatorUser.Id, time.AsDateTime(), session.Id, seat.Row, seat.Column, Guid.NewGuid())
+        reservation.Apply(new CreateDraftReservationEvent(
+            initiatorUser.Id,
+            time.AsDateTime(),
+            session.Id,
+            seat.Row,
+            seat.Column,
+            Guid.NewGuid(),
+            initiatorUser.Email.Value,
+            initiatorUser.UserName.FirstName,
+            initiatorUser.UserName.LastName
+        )
         {
             Version = reservation.Version + 1
         });
@@ -57,7 +67,8 @@ public class Reservation : DomainEntity, IAggregateRoot
     {
         Id = @event.ReservationId;
         Version = @event.Version;
-        InitiatorUser = InitiatorUser.From(@event.InitiatorUserId);
+        InitiatorUser = InitiatorUser.From(@event.InitiatorUserId, Email.From(@event.InitiatorUserEmail),
+            new UserName(@event.FirstName, @event.LastName));
         ReservationTime = ReservationTime.From(@event.ReservationDateTime);
         ReservationStatus = ReservationStatus.Draft;
         Session = Session.From(@event.SessionId);
@@ -65,7 +76,7 @@ public class Reservation : DomainEntity, IAggregateRoot
 
     public void MakeActive()
     {
-        Apply(new MakeReservationActive());        
+        Apply(new MakeReservationActive());
     }
 }
 

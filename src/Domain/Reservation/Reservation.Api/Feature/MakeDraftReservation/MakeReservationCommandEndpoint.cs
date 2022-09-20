@@ -1,12 +1,13 @@
 using FastEndpoints;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using RabbitMQ.Client.Core.DependencyInjection.Services.Interfaces;
 using Reservation.Api.Feature.MakeDraftReservation.ReservationCreated;
 using Reservation.Api.Service;
 using Reservation.Domain.ValueObjects;
 using Reservation.EventStore;
+using Reservation.Model.ValueObjects;
 using Reservation.Postgres;
-using Reservation.Settings.Infrastructure;
 using SharedKernel;
 
 namespace Reservation.Api.Feature.MakeDraftReservation;
@@ -18,21 +19,41 @@ public class MakeReservationCommandEndpoint : Endpoint<MakeReservationCommand, G
     private readonly AggregateRepository _aggregateRepository;
     private readonly ReservationConfigurationDbContext _dbContext;
     private readonly IActiveReservationFinder _activeReservationFinder;
+    private readonly IProducingService _producingService;
+    private readonly string _registerExchange = "user.api.exchange";
 
     public MakeReservationCommandEndpoint(
         AggregateRepository aggregateRepository,
         ReservationConfigurationDbContext dbContext,
-        IActiveReservationFinder activeReservationFinder
+        IActiveReservationFinder activeReservationFinder,
+        IProducingService producingService,
+        IConfiguration configuration
     )
     {
         _aggregateRepository = aggregateRepository;
         _dbContext = dbContext;
         _activeReservationFinder = activeReservationFinder;
+        _producingService = producingService;
     }
 
     public override async Task HandleAsync(MakeReservationCommand req, CancellationToken ct)
     {
-        if (await _activeReservationFinder.CheckDraftSessionExists(req.SeatModel.Row, req.SeatModel.Column, req.SessionId, ct))
+        await _producingService.SendAsync(new
+        {
+            req.InitiatorUser.Email,
+            req.InitiatorUser.FirstName,
+            req.InitiatorUser.LastName,
+            req.InitiatorUser.Mobile
+        }, _registerExchange, "register.routing-key");
+
+        if (
+            await _activeReservationFinder.CheckDraftSessionExists(
+                req.SeatModel.Row,
+                req.SeatModel.Column,
+                req.SessionId,
+                ct
+            )
+        )
         {
             throw new DomainException("already reserved");
         }
@@ -58,7 +79,11 @@ public class MakeReservationCommandEndpoint : Endpoint<MakeReservationCommand, G
             req.SeatModel.Column,
             reservationSettings.RowsAndColumns
         );
-        var user = InitiatorUser.From(req.InitiatorUserId);
+        var user = InitiatorUser.From(
+            req.InitiatorUser.Id,
+            Email.From(req.InitiatorUser.Email),
+            new UserName(req.InitiatorUser.FirstName, req.InitiatorUser.LastName)
+        );
         var session = Session.From(sessionConfig.Id);
 
         var reservation = Domain.Model.Reservation.CreateDraft(user, reservationTime, seat, session);

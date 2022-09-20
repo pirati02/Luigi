@@ -11,7 +11,19 @@ public class MakeReservationCommandValidation : Validator<MakeReservationCommand
             .NotEmpty()
             .NotNull();
         
-        RuleFor(a => a.InitiatorUserId)
+        RuleFor(a => a.InitiatorUser.Id)
+            .NotEmpty()
+            .NotNull();
+        
+        RuleFor(a => a.InitiatorUser.Email)
+            .NotEmpty()
+            .NotNull();
+        
+        RuleFor(a => a.InitiatorUser.FirstName)
+            .NotEmpty()
+            .NotNull();
+        
+        RuleFor(a => a.InitiatorUser.LastName)
             .NotEmpty()
             .NotNull();
 
