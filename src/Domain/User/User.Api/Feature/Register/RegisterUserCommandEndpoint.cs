@@ -25,6 +25,7 @@ public class RegisterUserCommandEndpoint : Endpoint<RegisterUserCommand>
         }
 
         await _userService.RegisterAsync(
+            req.Id,
             req.FirstName,
             req.LastName,
             req.Email,
@@ -32,7 +33,10 @@ public class RegisterUserCommandEndpoint : Endpoint<RegisterUserCommand>
             req.Mobile,
             req.CountryCode
         );
-        
-        await SendOkAsync(ct);
+
+        if (HttpContext is not null)
+        {
+            await SendOkAsync(ct);
+        }
     }
 }

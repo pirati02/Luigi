@@ -44,7 +44,12 @@ builder.Services.AddMarten(opt =>
     opt.Events.StreamIdentity = StreamIdentity.AsGuid;
     opt.DatabaseSchemaName = "events";
     opt.Projections.Add<ReservationProjection>(ProjectionLifecycle.Async);
-});
+}).ApplyAllDatabaseChangesOnStartup();
+builder.Services.AddDbContext<EventStoreDb>(opt =>
+{
+    opt.UseNpgsql(builder.Configuration.GetConnectionString("ReservationEventDb"));
+}, ServiceLifetime.Singleton);
+
 builder.Services.AddFastEndpoints();
 builder.Services.AddSwaggerDocument();
 builder.Services.AddSingleton<IElasticClient>(_ => ElasticClientFactory.BuildElasticClient(builder.Configuration));
@@ -57,6 +62,8 @@ builder.Services.ConnectToRabbitMq(builder.Configuration);
 
 var app = builder.Build();
 
+app.EnsureSessionStorageCreated();
+app.EnsureEventStorageCreated();
 app.UseFastEndpoints();
 app.UseApimundo();
 app.UseSwaggerUi3();

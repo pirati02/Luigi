@@ -4,7 +4,7 @@ namespace Reservation.Api.Feature.MakeDraftReservation;
 
 public record SeatModel(int Row, int Column);
 
-public record InitiateUserModel(Guid Id, string FirstName, string LastName, string Email, string Mobile);
+public record InitiateUserModel(string FirstName, string LastName, string Email, string Mobile);
  
 public record MakeReservationCommand
 {

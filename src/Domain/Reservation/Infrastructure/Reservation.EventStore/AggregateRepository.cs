@@ -1,4 +1,5 @@
 using Marten;
+using Marten.Storage;
 using SharedKernel;
 
 namespace Reservation.EventStore;

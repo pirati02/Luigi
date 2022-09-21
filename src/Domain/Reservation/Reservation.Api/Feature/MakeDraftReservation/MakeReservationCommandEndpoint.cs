@@ -14,20 +14,20 @@ namespace Reservation.Api.Feature.MakeDraftReservation;
 
 [HttpPost("reservation")]
 [AllowAnonymous]
-public class MakeReservationCommandEndpoint : Endpoint<MakeReservationCommand, Guid>
+public class MakeReservationCommandEndpoint : Endpoint<MakeReservationCommand>
 {
     private readonly AggregateRepository _aggregateRepository;
     private readonly ReservationConfigurationDbContext _dbContext;
     private readonly IActiveReservationFinder _activeReservationFinder;
     private readonly IProducingService _producingService;
     private readonly string _registerExchange = "user.api.exchange";
+    private readonly string _registerRoutingKey = "register.routing-key";
 
     public MakeReservationCommandEndpoint(
         AggregateRepository aggregateRepository,
         ReservationConfigurationDbContext dbContext,
         IActiveReservationFinder activeReservationFinder,
-        IProducingService producingService,
-        IConfiguration configuration
+        IProducingService producingService
     )
     {
         _aggregateRepository = aggregateRepository;
@@ -38,13 +38,15 @@ public class MakeReservationCommandEndpoint : Endpoint<MakeReservationCommand, G
 
     public override async Task HandleAsync(MakeReservationCommand req, CancellationToken ct)
     {
+        var id = Guid.NewGuid();
         await _producingService.SendAsync(new
         {
+            Id = id,
             req.InitiatorUser.Email,
             req.InitiatorUser.FirstName,
             req.InitiatorUser.LastName,
             req.InitiatorUser.Mobile
-        }, _registerExchange, "register.routing-key");
+        }, _registerExchange, _registerRoutingKey);
 
         if (
             await _activeReservationFinder.CheckDraftSessionExists(
@@ -80,7 +82,7 @@ public class MakeReservationCommandEndpoint : Endpoint<MakeReservationCommand, G
             reservationSettings.RowsAndColumns
         );
         var user = InitiatorUser.From(
-            req.InitiatorUser.Id,
+            id,
             Email.From(req.InitiatorUser.Email),
             new UserName(req.InitiatorUser.FirstName, req.InitiatorUser.LastName)
         );
@@ -89,7 +91,7 @@ public class MakeReservationCommandEndpoint : Endpoint<MakeReservationCommand, G
         var reservation = Domain.Model.Reservation.CreateDraft(user, reservationTime, seat, session);
         await _aggregateRepository.SaveAsync(reservation, ct);
 
-        await SendOkAsync(reservation.Id, ct);
+        await SendOkAsync(ct);
         await PublishAsync(
             new ReservationCreatedEvent(
                 reservation.Id,

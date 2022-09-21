@@ -6,14 +6,13 @@ public interface IUserService
 {
     Task<Neo4j.User?> FindByAsync(string email);
 
-    Task RegisterAsync(
+    Task RegisterAsync(Guid id,
         string firstName,
         string lastName,
         string email,
         string password,
         string mobile,
-        int? countryCode
-    );
+        int? countryCode);
 }
 
 public class UserService : IUserService
@@ -38,14 +37,13 @@ public class UserService : IUserService
         return result.Any() ? result[0] : null;
     }
 
-    public async Task RegisterAsync(
+    public async Task RegisterAsync(Guid id,
         string firstName,
         string lastName,
         string email,
         string password,
         string mobile,
-        int? countryCode
-    )
+        int? countryCode)
     {
         var encrypted = string.IsNullOrWhiteSpace(password)
             ? string.Empty
@@ -54,9 +52,10 @@ public class UserService : IUserService
 
         await _graphClient.Cypher
             .Create(
-                "(u:User {FirstName:$firstName, LastName:$lastName, Email:$email, Mobile:$mobile, CountryCode:$countryCode, Password:$password, NotActive:$notActive})")
+                "(u:User {Id:$id, FirstName:$firstName, LastName:$lastName, Email:$email, Mobile:$mobile, CountryCode:$countryCode, Password:$password, NotActive:$notActive})")
             .WithParams(new Dictionary<string, object>
             {
+                { "id", id },
                 { "firstName", firstName },
                 { "lastName", lastName },
                 { "email", email },
